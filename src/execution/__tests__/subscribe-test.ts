@@ -26,6 +26,7 @@ interface Email {
   unread: boolean;
 }
 
+// ------ type defs ----------
 const EmailType = new GraphQLObjectType({
   name: 'Email',
   fields: {
@@ -67,6 +68,7 @@ const EmailEventType = new GraphQLObjectType({
   },
 });
 
+// create a schema, define the subscription type inline (for some reason)
 const emailSchema = new GraphQLSchema({
   query: QueryType,
   subscription: new GraphQLObjectType({
@@ -83,6 +85,7 @@ const emailSchema = new GraphQLSchema({
 });
 
 function createSubscription(pubsub: SimplePubSub<Email>) {
+  // document (passed in from the client)
   const document = parse(`
     subscription ($priority: Int = 0) {
       importantEmail(priority: $priority) {
@@ -98,6 +101,7 @@ function createSubscription(pubsub: SimplePubSub<Email>) {
     }
   `);
 
+  // fake 'database' which holds emails on the back end
   const emails = [
     {
       from: 'joe@graphql.org',
@@ -107,9 +111,11 @@ function createSubscription(pubsub: SimplePubSub<Email>) {
     },
   ];
 
+  // data represents the payload that will be returned to the subscriber
   const data: any = {
     inbox: { emails },
     // FIXME: we shouldn't use mapAsyncIterator here since it makes tests way more complex
+    // importantEmail is a resolver which responds to the event that pubsub emits
     importantEmail: pubsub.getSubscriber((newEmail) => {
       emails.push(newEmail);
 
@@ -600,6 +606,7 @@ describe('Subscription Publish Phase', () => {
 
     // A new email arrives!
     expect(
+      // you would emit an event like this in, say, a mutation
       pubsub.emit({
         from: 'yuzhi@graphql.org',
         subject: 'Alright',

@@ -164,7 +164,7 @@ export interface ExecutionArgs {
  * If the arguments to this function do not result in a legal execution context,
  * a GraphQLError will be thrown immediately explaining the invalid input.
  */
-export function execute(args: ExecutionArgs): PromiseOrValue<ExecutionResult> {
+export function  execute(args: ExecutionArgs): PromiseOrValue<ExecutionResult> {
   // If a valid execution context cannot be created due to incorrect arguments,
   // a "Response" with only errors is returned.
   const exeContext = buildExecutionContext(args);
@@ -375,6 +375,7 @@ function executeOperation(
     case OperationTypeNode.SUBSCRIPTION:
       // TODO: deprecate `subscribe` and move all logic here
       // Temporary solution until we finish merging execute and subscribe together
+      // NOTE that this does not actually execute a subscription - this may need to be implemented manually
       return executeFields(exeContext, rootType, rootValue, path, rootFields);
   }
 }
